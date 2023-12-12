@@ -1,8 +1,6 @@
 import consumer from "channels/consumer"
 
-const robots = new Set();
-
-const thing = consumer.subscriptions.create("MovementChannel", {
+consumer.subscriptions.create("MovementChannel", {
   getContainer() {
     return document.getElementById("robots");
   },
@@ -21,28 +19,26 @@ const thing = consumer.subscriptions.create("MovementChannel", {
       robot.remove();
     }
 
-    const newRobot = document.createElement('tr');
-    newRobot.id = `robot-${id}`;
+    const tr = 
+      `<tr id="robot-${id}">
+        <td>${id}</td>
+        <td id="robot-${id}-status">🟢</td>
+        <td>
+          <button id="robot-${id}-move-button">Move</button>
+        </td>
+      </tr>
+      `
+    container.querySelector('tbody').innerHTML += tr;
 
-    newRobot.appendChild(document.createElement('td')).textContent = `Robot ${id}`;
-
-    const moveButton = newRobot
-      .appendChild(document.createElement('td'))
-      .appendChild(document.createElement('button'));
-
-    moveButton.id = `move-${id}`;
-    moveButton.textContent = "Move";
-    moveButton.addEventListener("click", () => {
+    document.querySelector(`#robot-${id}-move-button`).addEventListener("click", () => {
       this.perform("move", { id })
     });
-
-    container.querySelector('tbody').appendChild(newRobot);
   },
 
   removeRobot(id) {
     const robot = this.getRobot(id);
 
-    robot.remove();
+    robot.querySelector(`#robot-${id}-status`).innerHTML = "🔴";
   },
 
   connected() {
