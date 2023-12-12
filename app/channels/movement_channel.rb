@@ -2,6 +2,8 @@ class MovementChannel < ApplicationCable::Channel
   def subscribed
     stream_from "MovementChannel"
 
+    Robot.turn_on(id)
+
     ActionCable.server.broadcast(
       "MovementChannel",
       { type: "subscribed", id: }
@@ -9,7 +11,7 @@ class MovementChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
-    puts "unsubscribed"
+    Robot.turn_off(id)
 
     ActionCable.server.broadcast(
       "MovementChannel",
@@ -25,6 +27,8 @@ class MovementChannel < ApplicationCable::Channel
   end
 
   def acknowledgement
+    Robot.turn_on(id)
+
     ActionCable.server.broadcast(
       "MovementChannel",
       { type: "acknowledgement", id: }
