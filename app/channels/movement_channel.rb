@@ -4,7 +4,7 @@ class MovementChannel < ApplicationCable::Channel
 
     ActionCable.server.broadcast(
       "MovementChannel",
-      { type: "subscribed", id: params["computer_id"] }
+      { type: "subscribed", id: }
     )
   end
 
@@ -13,7 +13,7 @@ class MovementChannel < ApplicationCable::Channel
 
     ActionCable.server.broadcast(
       "MovementChannel",
-      { type: "unsubscribed", id: params["computer_id"] }
+      { type: "unsubscribed", id: }
     )
   end
 
@@ -24,10 +24,10 @@ class MovementChannel < ApplicationCable::Channel
     )
   end
 
-  def acknowledgement(data)
+  def acknowledgement
     ActionCable.server.broadcast(
       "MovementChannel",
-      { type: "acknowledgement", id: params["computer_id"] }
+      { type: "acknowledgement", id: }
     )
   end
 
@@ -36,5 +36,25 @@ class MovementChannel < ApplicationCable::Channel
       "MovementChannel",
       { type: "move" }
     )
+  end
+
+  def say_hello
+    ActionCable.server.broadcast(
+      "MovementChannel",
+      { type: "say_hello", id: }
+    )
+  end
+
+  def say_hello_complete
+    ActionCable.server.broadcast(
+      "MovementChannel",
+      { type: "action_completed", id:, action: "hello" }
+    )
+  end
+
+  private
+
+  def id
+    params["computer_id"]
   end
 end

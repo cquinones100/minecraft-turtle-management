@@ -22,9 +22,26 @@ consumer.subscriptions.create("MovementChannel", {
     const tr = 
       `<tr id="robot-${id}">
         <td>${id}</td>
-        <td id="robot-${id}-status">🟢</td>
+        <td
+          id="robot-${id}-status"
+          style="cursor:default;"
+          title="Ready to receive commands"
+        >
+          🟢
+        </td>
         <td>
-          <button id="robot-${id}-move-button">Move</button>
+          <button
+            id="robot-${id}-move-button"
+          >
+            Move
+          </button>
+        </td>
+        <td>
+          <button
+            id="robot-${id}-say_hello-button"
+          >
+            Say Hello
+          </button>
         </td>
       </tr>
       `
@@ -33,12 +50,32 @@ consumer.subscriptions.create("MovementChannel", {
     document.querySelector(`#robot-${id}-move-button`).addEventListener("click", () => {
       this.perform("move", { id })
     });
+
+    document.querySelector(`#robot-${id}-say_hello-button`).addEventListener("click", (e) => {
+      this.sayHello(id);
+    });
   },
 
   removeRobot(id) {
     const robot = this.getRobot(id);
 
     robot.querySelector(`#robot-${id}-status`).innerHTML = "🔴";
+  },
+
+  sayHello(id) {
+    const button = document.querySelector(`#robot-${id}-say_hello-button`);
+
+    button.disabled = true;
+    button.style.cursor = "wait";
+
+    this.perform("say_hello", { id })
+  },
+
+  sayHelloComplete(id) {
+    const button = document.querySelector(`#robot-${id}-say_hello-button`);
+
+    button.disabled = false;
+    button.style.cursor = "default";
   },
 
   connected() {
@@ -49,7 +86,9 @@ consumer.subscriptions.create("MovementChannel", {
     // Called when the subscription has been terminated by the server
   },
 
-  received({ type, id }) {
+  received({ type, id, ...rest }) {
+    console.log(`type: ${type}, id: ${id}`);
+
     if (type) {
       if (id !== null && id !== undefined) {
         switch (type) {
@@ -63,6 +102,13 @@ consumer.subscriptions.create("MovementChannel", {
 
           case "unsubscribed":
             this.removeRobot(id);
+            break;
+
+          case "action_completed":
+            const { action } = rest;
+
+            this.sayHelloComplete(id)
+
             break;
         }
       }
