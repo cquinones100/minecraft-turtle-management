@@ -1,0 +1,6 @@
+<% content_for :head do %>
+  <%= javascript_import_module_tag 'dashboard' %>
+<% end %>
+
+<div id="dashboard-container" data-robots=<%= @robots.to_json %>>
+</div>
