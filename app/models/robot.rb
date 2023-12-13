@@ -14,9 +14,19 @@ class Robot < ApplicationRecord
     Robot.find_by(robot_id:).turn_off
   end
 
+  def self.set_coordinates(robot_id, x:, y:, z:, direction:)
+    Robot
+      .find_or_create_by(robot_id:)
+      .set_coordinates(x:, y:, z:, direction:)
+  end
+
   def turn_on(x:, y:, z:, direction:)
     acknowledge
 
+    set_coordinates(x:, y:, z:, direction:)
+  end
+
+  def set_coordinates(x:, y:, z:, direction:)
     self.robot_coordinate = RobotCoordinate.create(
       robot: self,
       x:,
@@ -42,7 +52,7 @@ class Robot < ApplicationRecord
     {
       x: robot_coordinate.x,
       y: robot_coordinate.y,
-      z: robot_coordinate.z,
+      z: robot_coordinate.z
     }
   end
 

@@ -44,13 +44,6 @@ class MovementChannel < ApplicationCable::Channel
     )
   end
 
-  def move
-    ActionCable.server.broadcast(
-      "MovementChannel",
-      { type: "move" }
-    )
-  end
-
   def say_hello
     ActionCable.server.broadcast(
       "MovementChannel",
@@ -62,6 +55,30 @@ class MovementChannel < ApplicationCable::Channel
     ActionCable.server.broadcast(
       "MovementChannel",
       { type: "action_completed", id:, action: "hello" }
+    )
+  end
+
+  def move
+    ActionCable.server.broadcast(
+      "MovementChannel",
+      { type: "move", id: }
+    )
+  end
+
+  def move_complete(data)
+    coordinates = data["coordinates"]
+    id = data['computer_id']
+
+    Robot.set_coordinates(id,
+                          x: coordinates["x"],
+                          y: coordinates["y"],
+                          z: coordinates["z"],
+                          direction: coordinates["direction"]
+                         )
+
+    ActionCable.server.broadcast(
+      "MovementChannel",
+      { type: "action_completed", id:, action: "move" }
     )
   end
 
