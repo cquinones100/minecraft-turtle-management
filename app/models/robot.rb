@@ -17,9 +17,11 @@ class Robot < ApplicationRecord
   end
 
   def self.set_coordinates(robot_id, x:, y:, z:, direction:)
-    Robot
-      .find_or_create_by(robot_id:)
-      .set_coordinates(x:, y:, z:, direction:)
+    robot = Robot.find_or_create_by(robot_id:)
+
+    robot.set_coordinates(x:, y:, z:, direction:)
+
+    robot
   end
 
   def turn_on(x:, y:, z:, direction:)

@@ -69,7 +69,7 @@ class MovementChannel < ApplicationCable::Channel
     coordinates = data["coordinates"]
     id = data['computer_id']
 
-    Robot.set_coordinates(id,
+    robot = Robot.set_coordinates(id,
                           x: coordinates["x"],
                           y: coordinates["y"],
                           z: coordinates["z"],
@@ -79,6 +79,16 @@ class MovementChannel < ApplicationCable::Channel
     ActionCable.server.broadcast(
       "MovementChannel",
       { type: "action_completed", id:, action: "move" }
+    )
+
+    ActionCable.server.broadcast(
+      "MovementChannel",
+      {
+        type: "coordinates_updated",
+        id:,
+        coordinates: robot.coordinates,
+        direction: robot.direction
+      }
     )
   end
 

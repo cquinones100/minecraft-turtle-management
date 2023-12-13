@@ -110,6 +110,14 @@ consumer.subscriptions.create("MovementChannel", {
             this.completeAction(id, action);
 
             break;
+
+          case "coordinates_updated":
+            const { coordinates, direction } = rest;
+            const { x, y, z } = coordinates;
+
+            console.log(`coordinates: { x: ${x}, y: ${y}, z: ${z} }, direction: ${direction}`);
+
+            break;
         }
       }
     }
