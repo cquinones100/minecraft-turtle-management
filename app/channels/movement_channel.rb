@@ -54,7 +54,7 @@ class MovementChannel < ApplicationCable::Channel
   def say_hello_complete
     ActionCable.server.broadcast(
       "MovementChannel",
-      { type: "action_completed", id:, action: "hello" }
+      { type: "action_completed", id:, action: "say_hello" }
     )
   end
 

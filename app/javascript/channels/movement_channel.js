@@ -48,34 +48,34 @@ consumer.subscriptions.create("MovementChannel", {
     container.querySelector('tbody').innerHTML += tr;
 
     document.querySelector(`#robot-${id}-move-button`).addEventListener("click", () => {
-      this.perform("move", { id })
+      this.startAction(id, "move");
     });
 
     document.querySelector(`#robot-${id}-say_hello-button`).addEventListener("click", (e) => {
-      this.sayHello(id);
+      this.startAction(id, "say_hello");
     });
+  },
+
+  startAction(id, action) {
+    const button = document.querySelector(`#robot-${id}-${action}-button`);
+
+    button.disabled = true;
+    button.style.cursor = "wait";
+
+    this.perform(action, { id })
+  },
+
+  completeAction(id, action) {
+    const button = document.querySelector(`#robot-${id}-${action}-button`);
+
+    button.disabled = false;
+    button.style.cursor = "default";
   },
 
   removeRobot(id) {
     const robot = this.getRobot(id);
 
     robot.querySelector(`#robot-${id}-status`).innerHTML = "🔴";
-  },
-
-  sayHello(id) {
-    const button = document.querySelector(`#robot-${id}-say_hello-button`);
-
-    button.disabled = true;
-    button.style.cursor = "wait";
-
-    this.perform("say_hello", { id })
-  },
-
-  sayHelloComplete(id) {
-    const button = document.querySelector(`#robot-${id}-say_hello-button`);
-
-    button.disabled = false;
-    button.style.cursor = "default";
   },
 
   connected() {
@@ -107,7 +107,7 @@ consumer.subscriptions.create("MovementChannel", {
           case "action_completed":
             const { action } = rest;
 
-            this.sayHelloComplete(id)
+            this.completeAction(id, action);
 
             break;
         }
