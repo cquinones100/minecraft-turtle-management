@@ -1,6 +1,10 @@
 import { Component } from '../frontend';
 
 class Robot extends Component {
+  static find(id) {
+    return new Robot({ robot_id: id });
+  }
+
   constructor({ robot_id: id, status }) {
     super();
 
@@ -46,9 +50,36 @@ class Robot extends Component {
     }
   }
 
+  setStatus(status) {
+    this.status = status;
+
+    document.querySelector(`#robot-${this.id}-status`).innerHTML = this.getStatus();
+  }
+
   move() {
     console.log(this)
     console.log(`Moving ${this.id}`);
+
+    const moveButton = this.getMoveButton();
+    moveButton.style.cursor = "wait";
+    moveButton.disabled = true;
+
+    RobotChannel.perform("move", { id: this.id });
+  }
+
+  moveCompleted() {
+    const moveButton = this.getMoveButton();
+
+    moveButton.style.cursor = "default";
+    moveButton.disabled = false;
+  }
+
+  isMounted() {
+    return document.querySelector(`#robot-${this.id}`) !== null;
+  }
+
+  getMoveButton() {
+    return document.querySelector(`#robot-${this.id}-move-button`);
   }
 }
 

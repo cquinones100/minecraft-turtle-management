@@ -13,7 +13,10 @@ class Robot < ApplicationRecord
   end
 
   def self.turn_off(robot_id)
-    Robot.find_by(robot_id:).turn_off
+    robot = Robot.find_by(robot_id:)
+    robot.turn_off
+
+    robot.reload
   end
 
   def self.set_coordinates(robot_id, x:, y:, z:, direction:)
@@ -21,13 +24,15 @@ class Robot < ApplicationRecord
 
     robot.set_coordinates(x:, y:, z:, direction:)
 
-    robot
+    robot.reload
   end
 
   def turn_on(x:, y:, z:, direction:)
     acknowledge
 
     set_coordinates(x:, y:, z:, direction:)
+
+    reload
   end
 
   def set_coordinates(x:, y:, z:, direction:)

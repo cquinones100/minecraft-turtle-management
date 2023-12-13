@@ -2,6 +2,15 @@ import Robot from "./robot";
 import { Component } from "../frontend";
 
 class RobotTable extends Component {
+  static addRobot({ robot_id, status }) {
+    const robot = Robot.find(robot_id);
+    robot.setStatus(status);
+
+    if (!robot.isMounted()) {
+      robot.mount(document.querySelector("#robot-table tbody"));
+    }
+  }
+
   constructor(robots) {
     super();
 

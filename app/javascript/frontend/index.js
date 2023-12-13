@@ -32,6 +32,8 @@ class Component {
 
     this.addChildrenGroups(template.content.children[0], childrenGroups);
 
+    this.element = template.content.children[0];
+
     return template.content.children[0];
   }
 
@@ -87,6 +89,10 @@ class Component {
 
   mount(container) {
     container.appendChild(this.render());
+  }
+
+  isMounted() {
+    throw new Error("Not implemented");
   }
 }
 
