@@ -2,6 +2,8 @@ class Robot < ApplicationRecord
   has_one :robot_status, -> { order(created_at: :desc) }, dependent: :destroy
   has_one :robot_coordinate, -> { order(created_at: :desc) }, dependent: :destroy
 
+  validates :robot_id, presence: true, uniqueness: true
+
   def self.turn_on(robot_id, x:, y:, z:, direction:)
     Robot.find_or_create_by(robot_id:).turn_on(x:, y:, z:, direction:)
   end
