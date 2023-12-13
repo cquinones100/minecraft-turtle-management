@@ -2,8 +2,6 @@ class MovementChannel < ApplicationCable::Channel
   def subscribed
     stream_from "MovementChannel"
 
-    Robot.turn_on(id)
-
     ActionCable.server.broadcast(
       "MovementChannel",
       { type: "subscribed", id: }
@@ -11,7 +9,9 @@ class MovementChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
-    Robot.turn_off(id)
+    if id
+      Robot.turn_off(id)
+    end
 
     ActionCable.server.broadcast(
       "MovementChannel",
@@ -26,8 +26,17 @@ class MovementChannel < ApplicationCable::Channel
     )
   end
 
-  def acknowledgement
-    Robot.turn_on(id)
+  def acknowledgement(data)
+    coordinates = data["coordinates"]
+    id = data['computer_id']
+
+    Robot.turn_on(id,
+                  x: coordinates["x"],
+                  y: coordinates["y"],
+                  z: coordinates["z"],
+                  direction: coordinates["direction"]
+                 )
+
 
     ActionCable.server.broadcast(
       "MovementChannel",
