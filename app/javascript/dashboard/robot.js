@@ -25,6 +25,7 @@ class Robot extends Component {
         </td>
         <td>
           <button
+            class="btn btn-primary"
             id="robot-${this.id}-move-button"
             onclick=${this.move.bind(this)}
           >
@@ -33,6 +34,7 @@ class Robot extends Component {
         </td>
         <td>
           <button
+            class="btn btn-primary
             id="robot-${this.id}-say_hello-button"
           >
             Say Hello
