@@ -84,6 +84,10 @@ class RobotChannel < ApplicationCable::Channel
     )
   end
 
+  def disconnect
+    Robot.all.each(&:turn_off)
+  end
+
   private
 
   def id

@@ -12,7 +12,9 @@ function start() {
   }, {
     connected() {},
   
-    disconnected() {},
+    disconnected() {
+      this.perform("disconnect");
+    },
   
     received({ type, id: robot_id, ...rest }) {
       if (type) {
