@@ -2,8 +2,9 @@ import Robot from "./robot";
 import { Component } from "../frontend";
 
 class RobotTable extends Component {
-  static addRobot({ robot_id, status }) {
+  static addRobot({ robot_id, status, ...rest }) {
     const robot = Robot.find(robot_id);
+
     robot.setStatus(status);
 
     if (!robot.isMounted()) {
@@ -19,12 +20,14 @@ class RobotTable extends Component {
 
   body() {
     return this.html`
-      <table id="robot-table">
+      <table id="robot-table" class="table">
         <tbody>
           <tr>
-            <th>Robot Id</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th scope="col"></th>
+            <th scope="col">Robot Id</th>
+            <th scope="col">Coordinates</th>
+            <th scope="col">Direction</th>
+            <th scope="col">Actions</th>
           </tr>
           ${this.robots.map((robot) => {
             return new Robot(robot, this.container);

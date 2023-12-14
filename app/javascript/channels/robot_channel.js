@@ -40,6 +40,11 @@ function start() {
 
               console.log(`coordinates: { x: ${x}, y: ${y}, z: ${z} }, direction: ${direction}`);
 
+              const robot = Robot.find(robot_id);
+
+              robot.setCoordinates(coordinates);
+              robot.setDirection(direction);
+
               break;
           }
         }

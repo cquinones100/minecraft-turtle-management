@@ -38,6 +38,16 @@ class RobotChannel < ApplicationCable::Channel
       "robot_dashboard",
       { type: "acknowledgement", id:, status: robot.status }
     )
+
+    ActionCable.server.broadcast(
+      "robot_dashboard",
+      {
+        type: "coordinates_updated",
+        id:,
+        coordinates: robot.coordinates,
+        direction: robot.direction
+      }
+    )
   end
 
   def move(data)

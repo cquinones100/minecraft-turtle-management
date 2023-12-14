@@ -5,23 +5,33 @@ class Robot extends Component {
     return new Robot({ robot_id: id });
   }
 
-  constructor({ robot_id: id, status }) {
+  constructor({ robot_id: id, status, direction, coordinates }) {
     super();
 
     this.id = id;
     this.status = status;
+    this.direction = direction;
+    this.coordinates = coordinates;
   }
 
   body() {
     return this.html`
       <tr id="robot-${this.id}">
-        <td>${this.id}</td>
         <td
           id="robot-${this.id}-status"
           style="cursor:default;"
           title="Ready to receive commands"
         >
           ${this.getStatus()}
+        </td>
+        <td>${this.id}</td>
+        <td
+          id="robot-${this.id}-coordinates"
+        >
+          ${this.getCoordinates()}
+        </td>
+        <td id="robot-${this.id}-direction">
+          ${this.getDirection()}
         </td>
         <td>
           <button
@@ -82,6 +92,34 @@ class Robot extends Component {
 
   getMoveButton() {
     return document.querySelector(`#robot-${this.id}-move-button`);
+  }
+
+  setCoordinates(coordinates) {
+    this.coordinates = coordinates;
+
+    document
+      .querySelector(`#robot-${this.id}-coordinates`)
+      .innerHTML = this.getCoordinates();
+  }
+
+  setDirection(direction) {
+    this.direction = direction;
+
+    document
+      .querySelector(`#robot-${this.id}-direction`)
+      .innerHTML = this.getDirection();
+  }
+
+  getCoordinates() {
+    return `
+      ${this.coordinates.x},
+      ${this.coordinates.y},
+      ${this.coordinates.z}
+    `
+  }
+
+  getDirection() {
+    return `${this.direction}`
   }
 }
 
