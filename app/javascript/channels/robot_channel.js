@@ -1,8 +1,6 @@
 import consumer from "channels/consumer"
-import Robot from "../dashboard/robot";
-import RobotTable from "../dashboard/robot_table";
 
-function start() {
+function start(robotTable) {
   const channel = "RobotChannel";
   const dashboard = true;
 
@@ -42,7 +40,8 @@ function start() {
 
               console.log(`coordinates: { x: ${x}, y: ${y}, z: ${z} }, direction: ${direction}`);
 
-              const robot = Robot.find(robot_id);
+              const robot = robotTable
+                .robots.find(robot => robot.id == robot_id)
 
               robot.setCoordinates(coordinates);
               robot.setDirection(direction);
@@ -54,15 +53,19 @@ function start() {
     },
 
     addRobot({ robot_id, status }) {
-      RobotTable.addRobot({ robot_id, status });
+      robotTable.addRobot({ robot_id, status });
     },
 
     removeRobot({ robot_id, status }) {
-      Robot.find(robot_id).setStatus(status);
+      robotTable
+        .robots.find(robot => robot.id == robot_id)
+        .setStatus(status);
     },
 
     completeAction(robot_id, action) {
-      Robot.find(robot_id)[`${action}Completed`]();
+      robotTable
+        .robots
+        .find(robot => robot.id == robot_id)[`${action}Completed`]();
     },
   });
 }

@@ -1,4 +1,8 @@
 class Component {
+  constructor() {
+    this.stateValues = {};
+  }
+
   html(strings, ...values) {
     const template = document.createElement('template');
     const onClicks = [];
@@ -28,13 +32,13 @@ class Component {
       }
     }, "");
 
-    this.addClicks(template.content.children[0], onClicks);
-
-    this.addChildrenGroups(template.content.children[0], childrenGroups);
-
     this.element = template.content.children[0];
 
-    return template.content.children[0];
+    this.addClicks(this.element, onClicks);
+
+    this.addChildrenGroups(this.element, childrenGroups);
+
+    return this.element;
   }
 
   render() {
@@ -93,6 +97,19 @@ class Component {
 
   isMounted() {
     throw new Error("Not implemented");
+  }
+
+  state(key) {
+    this.stateValues[key] = this[key];
+
+    this[`set${key.charAt(0).toUpperCase() + key.slice(1)}`] = (value) => {
+      this[key] = value;
+
+      if (this.element) {
+        const element = this.element;
+        this.element.parentNode.replaceChild(this.render(), element);
+      }
+    }
   }
 }
 

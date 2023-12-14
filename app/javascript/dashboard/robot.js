@@ -1,10 +1,6 @@
 import { Component } from '../frontend';
 
 class Robot extends Component {
-  static find(id) {
-    return new Robot({ robot_id: id });
-  }
-
   constructor({ robot_id: id, status, direction, coordinates }) {
     super();
 
@@ -12,6 +8,10 @@ class Robot extends Component {
     this.status = status;
     this.direction = direction;
     this.coordinates = coordinates;
+
+    this.state('status');
+    this.state('coordinates');
+    this.state('direction');
   }
 
   body() {
@@ -62,12 +62,6 @@ class Robot extends Component {
     }
   }
 
-  setStatus(status) {
-    this.status = status;
-
-    document.querySelector(`#robot-${this.id}-status`).innerHTML = this.getStatus();
-  }
-
   move() {
     console.log(this)
     console.log(`Moving ${this.id}`);
@@ -87,27 +81,11 @@ class Robot extends Component {
   }
 
   isMounted() {
-    return document.querySelector(`#robot-${this.id}`) !== null;
+    return this.element.querySelector(`#robot-${this.id}`) !== null;
   }
 
   getMoveButton() {
-    return document.querySelector(`#robot-${this.id}-move-button`);
-  }
-
-  setCoordinates(coordinates) {
-    this.coordinates = coordinates;
-
-    document
-      .querySelector(`#robot-${this.id}-coordinates`)
-      .innerHTML = this.getCoordinates();
-  }
-
-  setDirection(direction) {
-    this.direction = direction;
-
-    document
-      .querySelector(`#robot-${this.id}-direction`)
-      .innerHTML = this.getDirection();
+    return this.element.querySelector(`#robot-${this.id}-move-button`);
   }
 
   getCoordinates() {

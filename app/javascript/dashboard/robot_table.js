@@ -2,20 +2,12 @@ import Robot from "./robot";
 import { Component } from "../frontend";
 
 class RobotTable extends Component {
-  static addRobot({ robot_id, status, ...rest }) {
-    const robot = Robot.find(robot_id);
-
-    robot.setStatus(status);
-
-    if (!robot.isMounted()) {
-      robot.mount(document.querySelector("#robot-table tbody"));
-    }
-  }
-
   constructor(robots) {
     super();
 
-    this.robots = robots;
+    this.robots = robots.map((robot) => {
+      return new Robot(robot);
+    });
   }
 
   body() {
@@ -29,12 +21,20 @@ class RobotTable extends Component {
             <th scope="col">Direction</th>
             <th scope="col">Actions</th>
           </tr>
-          ${this.robots.map((robot) => {
-            return new Robot(robot, this.container);
-          })}
+          ${this.robots}
         </tbody>
       </table>
     `;
+  }
+
+  addRobot({ robot_id, status, ...rest }) {
+    const robot = this.robots.find((robot) => robot.id == robot_id);
+
+    robot.setStatus(status);
+
+    if (!robot.isMounted()) {
+      robot.mount(document.querySelector("#robot-table tbody"));
+    }
   }
 }
 

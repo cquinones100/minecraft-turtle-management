@@ -9,5 +9,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   robotTable.mount(container)
 
-  window.RobotChannel = Channel();
+  window.RobotChannel = Channel(robotTable);
 });
