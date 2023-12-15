@@ -8,6 +8,8 @@ class RobotTable extends Component {
     this.robots = robots.map((robot) => {
       return new Robot(robot);
     });
+
+    this.state('robots');
   }
 
   body() {
@@ -30,10 +32,12 @@ class RobotTable extends Component {
   addRobot({ robot_id, status, ...rest }) {
     const robot = this.robots.find((robot) => robot.id == robot_id);
 
-    robot.setStatus(status);
+    if (robot) {
+      robot.setStatus(status);
+    } else {
+      const newRobots = this.robots.concat(new Robot({ robot_id, status, ...rest }));
 
-    if (!robot.isMounted()) {
-      robot.mount(document.querySelector("#robot-table tbody"));
+      this.setRobots(newRobots);
     }
   }
 }
