@@ -1,6 +1,36 @@
+//@ts-check
+
 import { Component } from '../frontend';
 
+/**
+ * @typedef {Object} Coordinates
+ * @property {number} x
+ * @property {number} y
+ * @property {number} z
+ */
+
+/**
+  * @typedef {("north"|"east"|"south"|"west")} Direction
+  */
+
+/**
+  * @typedef {("online"|"offline"|"error")} Status
+  */
+
+/** 
+ * @typedef {Object} RobotProps
+ * @property {number} robot_id
+ * @property {Status} status
+ * @property {Coordinates} coordinates
+ * @property {Direction} direction
+ */
+
+/** @extends {Component} */
 class Robot extends Component {
+  /**
+   * @param {RobotProps} props
+   */
+
   constructor({ robot_id: id, status, direction, coordinates }) {
     super();
 
@@ -8,10 +38,6 @@ class Robot extends Component {
     this.status = status;
     this.direction = direction;
     this.coordinates = coordinates;
-
-    this.state('status');
-    this.state('coordinates');
-    this.state('direction');
   }
 
   body() {
@@ -67,25 +93,33 @@ class Robot extends Component {
     console.log(`Moving ${this.id}`);
 
     const moveButton = this.getMoveButton();
+
     moveButton.style.cursor = "wait";
     moveButton.disabled = true;
 
-    RobotChannel.perform("move", { id: this.id });
+    window.RobotChannel.perform("move", { id: this.id });
   }
 
   moveCompleted() {
     const moveButton = this.getMoveButton();
 
-    moveButton.style.cursor = "default";
-    moveButton.disabled = false;
-  }
-
-  isMounted() {
-    return this.element.querySelector(`#robot-${this.id}`) !== null;
+    if (moveButton) {
+      moveButton.style.cursor = "default";
+      moveButton.disabled = false;
+    }
   }
 
   getMoveButton() {
-    return this.element.querySelector(`#robot-${this.id}-move-button`);
+    /** @type {unknown} */
+    const unknownButton = this.element?.querySelector(`#robot-${this.id}-move-button`);
+
+    const button = /** @type {HTMLButtonElement} */ (unknownButton);
+
+    if (!button) {
+      throw new Error(`Could not find move button for robot ${this.id}`);
+    } else {
+      return button;
+    }
   }
 
   getCoordinates() {
@@ -98,6 +132,34 @@ class Robot extends Component {
 
   getDirection() {
     return `${this.direction}`
+  }
+
+  /**
+    * @param {Status} status
+    * @returns {void}
+   */
+  setStatus(status) {
+    this.setState(() => {
+      this.status = status;
+    });
+  }
+
+  /**
+   * @param {Coordinates} coordinates
+   */
+  setCoordinates(coordinates) {
+    this.setState(() => {
+      this.coordinates = coordinates;
+    });
+  }
+
+  /**
+   * @param {Direction} direction
+   */
+  setDirection(direction) {
+    this.setState(() => {
+      this.direction = direction;
+    });
   }
 }
 

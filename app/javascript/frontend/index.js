@@ -1,8 +1,20 @@
+//@ts-check
+
 class Component {
   constructor() {
     this.stateValues = {};
+
+    /**
+     * The component's html element.
+     * @type {HTMLElement | null}
+     */ 
+    this.element = null;
   }
 
+  /**
+   * @param {TemplateStringsArray} strings
+   * @param {(function|string|number|Component|Component[])[]} values
+   */
   html(strings, ...values) {
     const template = document.createElement('template');
     const onClicks = [];
@@ -32,7 +44,7 @@ class Component {
       }
     }, "");
 
-    this.element = template.content.children[0];
+    this.element = /** @type {HTMLElement} */ (template.content.children[0]);
 
     this.addClicks(this.element, onClicks);
 
@@ -42,9 +54,17 @@ class Component {
   }
 
   render() {
-    return this.body();
+    /** @type {unknown} */
+    const unknownBody = this.body();
+    const body = /** @type {HTMLElement} */ (unknownBody);
+
+    return body;
   }
 
+  /**
+   * @param {HTMLElement} element
+   * @param {function[]} onClicks
+   */
   addClicks(element, onClicks) {
     if (onClicks.length == 0) {
       return;
@@ -52,6 +72,10 @@ class Component {
   
     if (element.hasAttribute("onclick")) {
       const onClick = onClicks.shift();
+
+      if (onClick == undefined) {
+        return;
+      }
   
       element.addEventListener("click", (e) => {
         onClick(e);
@@ -59,12 +83,20 @@ class Component {
   
       element.removeAttribute("onclick");
     }
-  
-    for (let child of element.children) {
+
+    /** @type {unknown} */
+    const unknown = element.children;
+    const children = /** @type {HTMLElement[]} */ (unknown);
+
+    for (let child of children) {
       this.addClicks(child, onClicks);
     }
   }
 
+  /**
+   * @param {HTMLElement} element
+   * @param {Component[][]} childrenGroups
+   */
   addChildrenGroups(element, childrenGroups) {
     if (childrenGroups.length == 0) {
       return;
@@ -74,10 +106,16 @@ class Component {
       return;
     }
 
-    for (let child of element.childNodes) {
+    for (let i = 0; i < element.childNodes.length; i++) {
+      const child = element.childNodes[i];
+
       if (child.nodeType == Node.COMMENT_NODE) {
         if (child.nodeValue == "child-container") {
           const childrenGroup = childrenGroups.shift();
+
+          if (childrenGroup == undefined) {
+            return;
+          }
 
           for (let child of childrenGroup) {
             element.appendChild(child.render());
@@ -86,29 +124,38 @@ class Component {
       }
     }
 
-    for (let child of element.children) {
-      this.addChildrenGroups(child, childrenGroups);
+    for (let i = 0; i < element.childNodes.length; i++) {
+      const child = element.childNodes[i];
+
+      /** @type {unknown} */
+      const unkonwnChild = child;
+      const typedChild = /** @type {HTMLElement} */ (unkonwnChild);
+
+      this.addChildrenGroups(typedChild, childrenGroups);
     }
   }
 
+  /**
+   * @param {HTMLElement} container
+   */
   mount(container) {
     container.appendChild(this.render());
   }
 
-  isMounted() {
+  body() {
     throw new Error("Not implemented");
   }
 
-  state(key) {
-    this.stateValues[key] = this[key];
+  /**
+   * @param {() => void} callback
+   */
+  setState(callback) {
+    callback();
 
-    this[`set${key.charAt(0).toUpperCase() + key.slice(1)}`] = (value) => {
-      this[key] = value;
+    if (this.element) {
+      const element = this.element;
 
-      if (this.element) {
-        const element = this.element;
-        this.element.parentNode.replaceChild(this.render(), element);
-      }
+      this.element.parentNode?.replaceChild(this.render(), element);
     }
   }
 }

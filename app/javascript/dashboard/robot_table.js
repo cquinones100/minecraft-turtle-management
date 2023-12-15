@@ -1,15 +1,25 @@
+// @ts-check
+
 import Robot from "./robot";
 import { Component } from "../frontend";
 
+/**
+ * @name RobotTable#setRobots
+ * @function
+ * @memberof RobotTable
+ * @param {Robot[]} robots
+ */
+
 class RobotTable extends Component {
+  /**
+   * @param {import("./robot").RobotProps[]} robots
+   */
   constructor(robots) {
     super();
 
     this.robots = robots.map((robot) => {
       return new Robot(robot);
     });
-
-    this.state('robots');
   }
 
   body() {
@@ -29,16 +39,30 @@ class RobotTable extends Component {
     `;
   }
 
-  addRobot({ robot_id, status, ...rest }) {
+  addRobot({ robot_id, status, coordinates, direction }) {
     const robot = this.robots.find((robot) => robot.id == robot_id);
 
     if (robot) {
       robot.setStatus(status);
     } else {
-      const newRobots = this.robots.concat(new Robot({ robot_id, status, ...rest }));
+      const newRobots = this.robots.concat(new Robot({
+        robot_id,
+        status,
+        coordinates,
+        direction
+      }));
 
       this.setRobots(newRobots);
     }
+  }
+
+  /**
+   * @param {Robot[]} robots
+   */
+  setRobots(robots) {
+    this.setState(() => {
+      this.robots = robots;
+    });
   }
 }
 
