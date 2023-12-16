@@ -20,7 +20,5 @@ document.addEventListener("DOMContentLoaded", () => {
   const robots = JSON.parse(dataRobots)
   const robotTable = new RobotTable(robots);
 
-  robotTable.mount(container)
-
-  window.RobotChannel = Channel(robotTable);
+  window.RobotChannel = Channel(robotTable, container)
 });

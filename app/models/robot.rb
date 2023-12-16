@@ -4,6 +4,7 @@ class Robot < ApplicationRecord
   has_one :robot_status, -> { order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
   has_one :robot_coordinate, -> { order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
   has_one :mia, -> { where(active: true).order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
+  has_one :mining_work, -> { where(completed: false).order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
 
   validates :robot_id, presence: true, uniqueness: true
 
@@ -56,17 +57,28 @@ class Robot < ApplicationRecord
     self.status = 'offline'
   end
 
-  delegate :status, to: :robot_status
+  delegate :status, to: :robot_status, allow_nil: true
 
   def coordinates
     {
-      x: robot_coordinate.x,
-      y: robot_coordinate.y,
-      z: robot_coordinate.z
+      x: robot_coordinate&.x,
+      y: robot_coordinate&.y,
+      z: robot_coordinate&.z
     }
   end
 
-  delegate :direction, to: :robot_coordinate
+  delegate :direction, to: :robot_coordinate, allow_nil: true
+
+  def start_mining
+    raise 'Robot is offline' if status == 'offline'
+    raise 'Robot is already mining' if mining?
+
+    self.mining_work = MiningWork.create(robot: self)
+  end
+
+  def mining?
+    mining_work.present?
+  end
 
   private
 

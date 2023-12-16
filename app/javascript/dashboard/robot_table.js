@@ -17,6 +17,8 @@ class RobotTable extends Component {
   constructor(robots) {
     super();
 
+    console.log(robots);
+
     this.robots = robots.map((robot) => {
       return new Robot(robot);
     });
@@ -39,18 +41,18 @@ class RobotTable extends Component {
     `;
   }
 
-  addRobot({ robot_id, status, coordinates, direction }) {
-    const robot = this.robots.find((robot) => robot.id == robot_id);
+  /**
+    * @param {import("./robot").RobotProps} robot
+    */
+  addRobot(robot) {
+    const existingRobot = this.robots.find((theRobot) => 
+      theRobot.id == robot.robot_id
+    );
 
-    if (robot) {
-      robot.setStatus(status);
+    if (existingRobot) {
+      existingRobot.setStatus(robot.status);
     } else {
-      const newRobots = this.robots.concat(new Robot({
-        robot_id,
-        status,
-        coordinates,
-        direction
-      }));
+      const newRobots = this.robots.concat(new Robot(robot));
 
       this.setRobots(newRobots);
     }

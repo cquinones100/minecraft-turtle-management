@@ -13,19 +13,20 @@ class Component {
 
   /**
    * @param {TemplateStringsArray} strings
-   * @param {(function|string|number|Component|Component[])[]} values
+   * @param {(function|string|number|boolean|Component|Component[])[]} values
    */
   html(strings, ...values) {
     const template = document.createElement('template');
     const onClicks = [];
-    const childrenGroups = []
+    const childrenGroups = [];
 
-    template.innerHTML = strings.reduce((acc, str, i) => {
+    const string = strings.reduce((acc, str, i) => {
       acc += str;
 
       if (values[i] !== undefined && values[i] !== null) {
         if (typeof values[i] == "function") {
           onClicks.push(values[i]);
+          acc += "theOnClick";
 
           return acc;
         }
@@ -43,12 +44,19 @@ class Component {
         return acc;
       }
     }, "");
+    template.innerHTML = string;
 
     this.element = /** @type {HTMLElement} */ (template.content.children[0]);
 
     this.addClicks(this.element, onClicks);
 
     this.addChildrenGroups(this.element, childrenGroups);
+
+    if (this.element.tagName == "BUTTON") {
+      if (this.element.getAttribute("disabled") == "false") {
+        this.element.removeAttribute("disabled");
+      }
+    }
 
     return this.element;
   }

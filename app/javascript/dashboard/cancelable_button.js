@@ -3,12 +3,13 @@
 import { Component } from "../frontend";
 
 class CancelableButton extends Component {
-  constructor({ robotId, action, text = null }) {
+  constructor({ robotId, action, text = null, disabled = false }) {
     super();
 
     this.action = action;
     this.robotId = robotId;
     this.text = text;
+    this.disabled = disabled
   }
 
   body() {
@@ -17,6 +18,7 @@ class CancelableButton extends Component {
         class="btn btn-primary"
         id="robot-${this.robotId}-${this.action}-button"
         onclick=${this.onClick.bind(this)}
+        disabled="${this.disabled}"
       >
         ${this.displayedAction()}
       </button>
@@ -32,24 +34,17 @@ class CancelableButton extends Component {
   }
 
   onClick() {
-    this.getButton().style.cursor = "wait";
-    this.getButton().disabled = true;
+    this.setState(() => {
+      window.RobotChannel.perform(this.action, { id: this.robotId });
 
-    window.RobotChannel.perform(this.action, { id: this.robotId });
+      this.disabled = true;
+    });
   }
 
   enable() {
-    this.getButton().style.cursor = "default";
-    this.getButton().disabled = false;
-  }
-
-  getButton() {
-    /** @type {unknown} */
-    const unknownButton = this.element;
-
-    const button = /** @type {HTMLButtonElement} */ (unknownButton);
-
-    return button;
+    this.setState(() => {
+      this.disabled = false;
+    });
   }
 }
 

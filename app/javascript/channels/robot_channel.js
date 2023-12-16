@@ -4,8 +4,9 @@ import consumer from "./consumer"
 
 /**
  * @param {import("../dashboard/robot_table").default} robotTable
+ * @param {HTMLElement} [container]
  */
-function start(robotTable) {
+function start(robotTable, container) {
   const channel = "RobotChannel";
   const dashboard = true;
 
@@ -13,7 +14,9 @@ function start(robotTable) {
     channel,
     dashboard,
   }, {
-    connected() {},
+    connected() {
+      robotTable.mount(container);
+    },
   
     disconnected() {
       this.perform("disconnect");

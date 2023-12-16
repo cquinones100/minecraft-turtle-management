@@ -24,6 +24,7 @@ import CancelableButton from './cancelable_button';
  * @property {Status} status
  * @property {Coordinates} coordinates
  * @property {Direction} direction
+ * @property {boolean} mining
  */
 
 /** @extends {Component} */
@@ -32,7 +33,7 @@ class Robot extends Component {
    * @param {RobotProps} props
    */
 
-  constructor({ robot_id: id, status, direction, coordinates }) {
+  constructor({ robot_id: id, status, direction, coordinates, mining }) {
     super();
 
     this.id = id;
@@ -48,6 +49,7 @@ class Robot extends Component {
     this.mineButton = new CancelableButton({
       action: "mine",
       robotId: this.id,
+      disabled: mining,
     });
 
     this.miaButton = new CancelableButton({
@@ -67,7 +69,7 @@ class Robot extends Component {
         >
           ${this.getStatus()}
         </td>
-        <td>${this.id}</td>
+        <td id="robot-${this.id}-id">${this.id}</td>
         <td
           id="robot-${this.id}-coordinates"
         >
@@ -107,15 +109,19 @@ class Robot extends Component {
   }
 
   getCoordinates() {
-    return `
-      ${this.coordinates.x},
-      ${this.coordinates.y},
-      ${this.coordinates.z}
-    `
+    if (this.coordinates && this.coordinates.x && this.coordinates.y && this.coordinates.z) {
+      return `
+        ${this.coordinates.x},
+        ${this.coordinates.y},
+        ${this.coordinates.z}
+      `
+    } else {
+      return "";
+    }
   }
 
   getDirection() {
-    return `${this.direction}`
+    return `${this.direction || ''}`
   }
 
   /**
