@@ -49,6 +49,12 @@ class Robot extends Component {
       action: "mine",
       robotId: this.id,
     });
+
+    this.miaButton = new CancelableButton({
+      action: "mia",
+      robotId: this.id,
+      text: "Mark as MIA",
+    });
   }
 
   body() {
@@ -77,12 +83,8 @@ class Robot extends Component {
           ${[this.mineButton]}
         </td>
         <td>
-          <button
-            class="btn btn-primary
-            id="robot-${this.id}-say_hello-button"
-          >
-            Say Hello
-          </button>
+          ${[this.miaButton]}
+        </td>
         </td>
       </tr>
     `;

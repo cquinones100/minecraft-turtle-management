@@ -1,6 +1,7 @@
 class Robot < ApplicationRecord
   has_one :robot_status, -> { order(created_at: :desc) }, dependent: :destroy
   has_one :robot_coordinate, -> { order(created_at: :desc) }, dependent: :destroy
+  has_one :mia, -> { where(active: true).order(created_at: :desc) }
 
   validates :robot_id, presence: true, uniqueness: true
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_13_010406) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_16_170305) do
   create_table "robot_coordinates", force: :cascade do |t|
     t.integer "robot_id", null: false
     t.integer "x", null: false
@@ -23,6 +23,12 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_13_010406) do
     t.index ["x"], name: "index_robot_coordinates_on_x"
     t.index ["y"], name: "index_robot_coordinates_on_y"
     t.index ["z"], name: "index_robot_coordinates_on_z"
+  end
+
+  create_table "robot_mias", force: :cascade do |t|
+    t.integer "robot_id", null: false
+    t.boolean "active", default: true, null: false
+    t.index ["robot_id"], name: "index_robot_mias_on_robot_id"
   end
 
   create_table "robot_statuses", force: :cascade do |t|

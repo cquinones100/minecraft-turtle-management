@@ -3,11 +3,12 @@
 import { Component } from "../frontend";
 
 class CancelableButton extends Component {
-  constructor({ robotId, action }) {
+  constructor({ robotId, action, text = null }) {
     super();
 
     this.action = action;
     this.robotId = robotId;
+    this.text = text;
   }
 
   body() {
@@ -23,6 +24,10 @@ class CancelableButton extends Component {
   }
 
   displayedAction() {
+    if (this.text) {
+      return this.text;
+    }
+
     return this.action[0].toUpperCase() + this.action.slice(1);
   }
 
