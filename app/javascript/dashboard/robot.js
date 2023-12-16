@@ -1,6 +1,7 @@
 //@ts-check
 
 import { Component } from '../frontend';
+import CancelableButton from './cancelable_button';
 
 /**
  * @typedef {Object} Coordinates
@@ -38,6 +39,16 @@ class Robot extends Component {
     this.status = status;
     this.direction = direction;
     this.coordinates = coordinates;
+
+    this.moveButton = new CancelableButton({
+      action: "move",
+      robotId: this.id,
+    });
+
+    this.mineButton = new CancelableButton({
+      action: "mine",
+      robotId: this.id,
+    });
   }
 
   body() {
@@ -60,13 +71,10 @@ class Robot extends Component {
           ${this.getDirection()}
         </td>
         <td>
-          <button
-            class="btn btn-primary"
-            id="robot-${this.id}-move-button"
-            onclick=${this.move.bind(this)}
-          >
-            Move
-          </button>
+          ${[this.moveButton]}
+        </td>
+        <td>
+          ${[this.mineButton]}
         </td>
         <td>
           <button
@@ -88,38 +96,12 @@ class Robot extends Component {
     }
   }
 
-  move() {
-    console.log(this)
-    console.log(`Moving ${this.id}`);
-
-    const moveButton = this.getMoveButton();
-
-    moveButton.style.cursor = "wait";
-    moveButton.disabled = true;
-
-    window.RobotChannel.perform("move", { id: this.id });
-  }
-
   moveCompleted() {
-    const moveButton = this.getMoveButton();
-
-    if (moveButton) {
-      moveButton.style.cursor = "default";
-      moveButton.disabled = false;
-    }
+    this.moveButton.enable();
   }
 
-  getMoveButton() {
-    /** @type {unknown} */
-    const unknownButton = this.element?.querySelector(`#robot-${this.id}-move-button`);
-
-    const button = /** @type {HTMLButtonElement} */ (unknownButton);
-
-    if (!button) {
-      throw new Error(`Could not find move button for robot ${this.id}`);
-    } else {
-      return button;
-    }
+  mineCompleted() {
+    this.mineButton.enable();
   }
 
   getCoordinates() {

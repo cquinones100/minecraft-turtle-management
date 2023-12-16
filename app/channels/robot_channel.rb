@@ -57,6 +57,13 @@ class RobotChannel < ApplicationCable::Channel
     )
   end
 
+  def mine(data)
+    ActionCable.server.broadcast(
+      "robot_dashboard_#{data["id"]}",
+      { type: "mine", id: data["id"] }
+    )
+  end
+
   def move_complete(data)
     coordinates = data["coordinates"]
     id = data['computer_id']
@@ -71,6 +78,33 @@ class RobotChannel < ApplicationCable::Channel
     ActionCable.server.broadcast(
       "robot_dashboard",
       { type: "action_completed", id:, action: "move" }
+    )
+
+    ActionCable.server.broadcast(
+      "robot_dashboard",
+      {
+        type: "coordinates_updated",
+        id:,
+        coordinates: robot.coordinates,
+        direction: robot.direction
+      }
+    )
+  end
+
+  def mine_complete(data)
+    coordinates = data["coordinates"]
+    id = data['computer_id']
+
+    robot = Robot.set_coordinates(id,
+                          x: coordinates["x"],
+                          y: coordinates["y"],
+                          z: coordinates["z"],
+                          direction: coordinates["direction"]
+                         )
+
+    ActionCable.server.broadcast(
+      "robot_dashboard",
+      { type: "action_completed", id:, action: "mine" }
     )
 
     ActionCable.server.broadcast(
