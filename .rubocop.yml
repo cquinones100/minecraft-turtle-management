@@ -1,0 +1,30 @@
+require:
+  - rubocop-capybara
+  - rubocop-rails
+  - rubocop-rspec
+
+Naming/MethodParameterName:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+AllCops:
+  Exclude:
+    - 'config/**/*'
+    - 'db/**/*'    
+    - 'vendor/**/*'
+    - 'bin/**/*'
+

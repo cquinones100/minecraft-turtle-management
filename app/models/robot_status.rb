@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RobotStatus < ApplicationRecord
   belongs_to :robot
 

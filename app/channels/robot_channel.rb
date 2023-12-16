@@ -5,11 +5,11 @@ class RobotChannel < ApplicationCable::Channel
     if params[:dashboard]
       stream_from 'robot_dashboard'
 
-      puts 'Dashboard subscribed to RobotChannel'
+      Rails.logger.debug 'Dashboard subscribed to RobotChannel'
     elsif id
       stream_from "robot_dashboard_#{params[:computer_id]}"
 
-      puts "Robot #{id} subscribed to RobotChannel"
+      Rails.logger.debug "Robot #{id} subscribed to RobotChannel"
     end
   end
 
@@ -117,7 +117,7 @@ class RobotChannel < ApplicationCable::Channel
   end
 
   def disconnect
-    Robot.all.each(&:turn_off)
+    Robot.all.find_each(&:turn_off)
   end
 
   private

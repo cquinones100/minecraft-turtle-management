@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 class Robot < ApplicationRecord
-  has_one :robot_status, -> { order(created_at: :desc) }, dependent: :destroy
-  has_one :robot_coordinate, -> { order(created_at: :desc) }, dependent: :destroy
-  has_one :mia, -> { where(active: true).order(created_at: :desc) }
+  has_one :robot_status, -> { order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
+  has_one :robot_coordinate, -> { order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
+  has_one :mia, -> { where(active: true).order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
 
   validates :robot_id, presence: true, uniqueness: true
 
@@ -47,16 +49,14 @@ class Robot < ApplicationRecord
   end
 
   def acknowledge
-    self.status = "online"
+    self.status = 'online'
   end
 
   def turn_off
-    self.status = "offline"
+    self.status = 'offline'
   end
 
-  def status
-    robot_status.status
-  end
+  delegate :status, to: :robot_status
 
   def coordinates
     {
@@ -66,16 +66,13 @@ class Robot < ApplicationRecord
     }
   end
 
-  def direction
-    robot_coordinate.direction
-  end
+  delegate :direction, to: :robot_coordinate
 
   private
 
-
   def status=(type)
-    if robot_status&.status != type
-      RobotStatus.create(robot: self, status: type)
-    end
+    return unless robot_status&.status != type
+
+    RobotStatus.create(robot: self, status: type)
   end
 end
