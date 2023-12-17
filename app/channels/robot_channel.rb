@@ -76,6 +76,7 @@ class RobotChannel < ApplicationCable::Channel
     robot = Robot.find(robot_id)
 
     original_message = data['original_message']
+    original_message.merge!({ robot_id: id }.stringify_keys)
 
     case original_message['type']
     when 'turtle_action'

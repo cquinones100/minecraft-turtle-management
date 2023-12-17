@@ -2,9 +2,11 @@ class NextAction < ApplicationRecord
   belongs_to :robot
 
   def complete!(response = {})
+    response[:method_name] = method_name
+    response[:robot_id] = robot.robot_id
+
     class_name
       .constantize
-      .new(response, robot_id: robot.robot_id)
-      .send(method_name)
+      .perform_async(response.stringify_keys)
   end
 end
