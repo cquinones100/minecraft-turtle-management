@@ -11,7 +11,7 @@ class WorkJob
     before_perform
 
     puts ''
-    puts "doing work. params: #{params}"
+    puts "doing work #{self.class.name}. params: #{params}"
     puts ''
 
     Work.create(job_id: jid, robot_id:)

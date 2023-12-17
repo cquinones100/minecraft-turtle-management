@@ -60,16 +60,10 @@ class RobotChannel < ApplicationCable::Channel
   def mine(data)
     robot_id = data['id']
 
-    QueryJob
-      .perform_async(
-        robot_id,
-        ['getFuelLevel'],
-        "MineWithFuelLevel",
-        "call"
-      )
+    MineJob.perform_async({ robot_id:, method_name: 'start_mining' }.stringify_keys)
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
   def action_done(data)
     job_id = data['job_id']
     robot_id = data['computer_id']
@@ -112,7 +106,7 @@ class RobotChannel < ApplicationCable::Channel
       { type: 'action_completed', id: robot_id }
     )
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
   def disconnect
     Robot.all.find_each(&:turn_off)
