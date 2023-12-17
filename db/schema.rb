@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_17_041533) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_18_005021) do
   create_table "mining_works", force: :cascade do |t|
     t.integer "robot_id", null: false
     t.boolean "completed", default: false, null: false
@@ -51,6 +51,16 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_17_041533) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["robot_id"], name: "index_robots_on_robot_id", unique: true
+  end
+
+  create_table "works", force: :cascade do |t|
+    t.integer "robot_id", null: false
+    t.string "job_id"
+    t.boolean "completed", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_id"], name: "index_works_on_job_id", unique: true
+    t.index ["robot_id"], name: "index_works_on_robot_id"
   end
 
 end

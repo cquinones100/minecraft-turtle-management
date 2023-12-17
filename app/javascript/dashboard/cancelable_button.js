@@ -3,13 +3,14 @@
 import { Component } from "../frontend";
 
 class CancelableButton extends Component {
-  constructor({ robotId, action, text = null, disabled = false }) {
+  constructor({ robotId, action, text = null, disabled = false, onClick }) {
     super();
 
     this.action = action;
     this.robotId = robotId;
     this.text = text;
     this.disabled = disabled
+    this.onClick = onClick;
   }
 
   body() {
@@ -31,14 +32,6 @@ class CancelableButton extends Component {
     }
 
     return this.action[0].toUpperCase() + this.action.slice(1);
-  }
-
-  onClick() {
-    this.setState(() => {
-      window.RobotChannel.perform(this.action, { id: this.robotId });
-
-      this.disabled = true;
-    });
   }
 
   enable() {

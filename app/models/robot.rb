@@ -4,9 +4,13 @@ class Robot < ApplicationRecord
   has_one :robot_status, -> { order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
   has_one :robot_coordinate, -> { order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
   has_one :mia, -> { where(active: true).order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
-  has_one :mining_work, -> { where(completed: false).order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
+  has_one :work, -> { where(completed: false).order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
 
   validates :robot_id, presence: true, uniqueness: true
+
+  def busy?
+    work.present?
+  end
 
   def self.turn_on(robot_id, x:, y:, z:, direction:)
     Robot.find_or_create_by(robot_id:).turn_on(x:, y:, z:, direction:)
@@ -49,6 +53,42 @@ class Robot < ApplicationRecord
     )
   end
 
+  def x=(value)
+    set_coordinates(
+      x: value,
+      y: robot_coordinate&.y,
+      z: robot_coordinate&.z,
+      direction: robot_coordinate&.direction
+    )
+  end
+
+  def y=(value)
+    set_coordinates(
+      x: robot_coordinate&.x,
+      y: value,
+      z: robot_coordinate&.z,
+      direction: robot_coordinate&.direction
+    )
+  end
+
+  def z=(value)
+    set_coordinates(
+      x: robot_coordinate&.x,
+      y: robot_coordinate&.y,
+      z: value,
+      direction: robot_coordinate&.direction
+    )
+  end
+
+  def direction=(value)
+    set_coordinates(
+      x: robot_coordinate&.x,
+      y: robot_coordinate&.y,
+      z: robot_coordinate&.z,
+      direction: value
+    )
+  end
+
   def acknowledge
     self.status = 'online'
   end
@@ -58,6 +98,7 @@ class Robot < ApplicationRecord
   end
 
   delegate :status, to: :robot_status, allow_nil: true
+  delegate :x, :y, :z, to: :robot_coordinate, allow_nil: true
 
   def coordinates
     {
@@ -77,7 +118,7 @@ class Robot < ApplicationRecord
   end
 
   def mining?
-    mining_work.present?
+    false
   end
 
   private

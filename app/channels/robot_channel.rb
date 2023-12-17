@@ -51,17 +51,41 @@ class RobotChannel < ApplicationCable::Channel
   end
 
   def move(data)
-    ActionCable.server.broadcast(
-      "robot_dashboard_#{data['id']}",
-      { type: 'move', id: data['id'] }
-    )
+    direction = data['direction']
+    robot_id = data['id']
+
+    MoveJob.perform_async(robot_id, direction)
   end
 
-  def mine(data)
-    ActionCable.server.broadcast(
-      "robot_dashboard_#{data['id']}",
-      { type: 'mine', id: data['id'] }
-    )
+  def action_done(data)
+    job_id = data['job_id']
+    robot_id = data['computer_id']
+    robot = Robot.find(robot_id)
+
+    original_message = data['original_message']
+
+    if original_message['type'] == 'turtle_action'
+      direction = original_message['direction']
+
+      Work.find_by(job_id:).complete!
+
+      Move.new(robot:, direction:).update_coordinates!
+
+      ActionCable.server.broadcast(
+        'robot_dashboard',
+        {
+          type: 'coordinates_updated',
+          id: robot.robot_id,
+          coordinates: robot.coordinates,
+          direction: robot.direction
+        }
+      )
+
+      ActionCable.server.broadcast(
+        'robot_dashboard',
+        { type: 'action_completed', id: }
+      )
+    end
   end
 
   def move_complete(data)

@@ -24,7 +24,7 @@ import CancelableButton from './cancelable_button';
  * @property {Status} status
  * @property {Coordinates} coordinates
  * @property {Direction} direction
- * @property {boolean} mining
+ * @property {boolean} busy
  */
 
 /** @extends {Component} */
@@ -33,30 +33,14 @@ class Robot extends Component {
    * @param {RobotProps} props
    */
 
-  constructor({ robot_id: id, status, direction, coordinates, mining }) {
+  constructor({ robot_id: id, status, direction, coordinates, busy }) {
     super();
 
     this.id = id;
     this.status = status;
     this.direction = direction;
     this.coordinates = coordinates;
-
-    this.moveButton = new CancelableButton({
-      action: "move",
-      robotId: this.id,
-    });
-
-    this.mineButton = new CancelableButton({
-      action: "mine",
-      robotId: this.id,
-      disabled: mining,
-    });
-
-    this.miaButton = new CancelableButton({
-      action: "mia",
-      robotId: this.id,
-      text: "Mark as MIA",
-    });
+    this.busy = busy;
   }
 
   body() {
@@ -78,34 +62,35 @@ class Robot extends Component {
         <td id="robot-${this.id}-direction">
           ${this.getDirection()}
         </td>
-        <td>
-          ${[this.moveButton]}
-        </td>
-        <td>
-          ${[this.mineButton]}
-        </td>
-        <td>
-          ${[this.miaButton]}
-        </td>
+        <td>${[this.moveButton('forward')]}</td>
+        <td>${[this.moveButton('backward')]}</td>
         </td>
       </tr>
     `;
   }
 
+  /**
+   * @param {"forward"|"backward"} direction
+   */
+  moveButton(direction) {
+    return new CancelableButton({
+      action: `Move ${direction}`,
+      robotId: this.id,
+      onClick: this.move.bind(this, direction),
+      disabled: this.busy,
+    });
+  }
+
   getStatus() {
+    if (this.busy) {
+      return "⏳";
+    }
+
     if (this.status == "online") {
       return "🟢";
     } else {
       return "🔴";
     }
-  }
-
-  moveCompleted() {
-    this.moveButton.enable();
-  }
-
-  mineCompleted() {
-    this.mineButton.enable();
   }
 
   getCoordinates() {
@@ -149,6 +134,23 @@ class Robot extends Component {
   setDirection(direction) {
     this.setState(() => {
       this.direction = direction;
+    });
+  }
+
+  /**
+   * @param {"forward"|"backward"} direction
+   */
+  move(direction) {
+    this.setState(() => {
+      this.busy = true;
+
+      window.RobotChannel.perform("move", { id: this.id, direction });
+    });
+  }
+
+  completeAction() {
+    this.setState(() => {
+      this.busy = false;
     });
   }
 }

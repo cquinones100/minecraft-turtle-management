@@ -8,7 +8,7 @@ class DashboardController < ApplicationController
         status: robot.status,
         direction: robot.direction,
         coordinates: robot.coordinates,
-        mining: robot.mining?
+        busy: robot.busy?
       }
     end
   end

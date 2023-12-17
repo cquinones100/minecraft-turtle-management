@@ -27,7 +27,15 @@ function start(robotTable, container) {
         if (robot_id !== null && robot_id !== undefined) {
           switch (type) {
             case "acknowledgement":
-              this.addRobot({ robot_id, status, coordinates, direction });
+              const { busy } = rest;
+
+              this.addRobot({
+                robot_id,
+                status,
+                coordinates,
+                direction,
+                busy
+              });
 
               break;
             case "unsubscribed":
@@ -35,9 +43,7 @@ function start(robotTable, container) {
 
               break;
             case "action_completed":
-              const { action } = rest;
-
-              this.completeAction(robot_id, action);
+              this.completeAction(robot_id);
 
               break;
             case "coordinates_updated":
@@ -57,8 +63,11 @@ function start(robotTable, container) {
       }
     },
 
-    addRobot({ robot_id, status, coordinates, direction }) {
-      robotTable.addRobot({ robot_id, status, coordinates, direction })
+    /**
+     * @param {import("../dashboard/robot").RobotProps} robotProps
+     */
+    addRobot(robotProps) {
+      robotTable.addRobot(robotProps);
     },
 
     removeRobot({ robot_id, status }) {
@@ -67,15 +76,15 @@ function start(robotTable, container) {
 
     /**
      * @param {number} robot_id
-     * @param {string} action
      */
-    completeAction(robot_id, action) {
+    completeAction(robot_id) {
       const robot = robotTable.robots.find(robot => robot.id == robot_id);
+
       if (!robot) {
         return;
       }
 
-      robot[`${action}Completed`]();
+      robot.completeAction()
     },
   });
 }
