@@ -28,6 +28,8 @@ class Move
   end
 
   def update_coordinates!
+    return unless direction
+
     send("update_coordinates_#{direction}")
 
     robot.save!

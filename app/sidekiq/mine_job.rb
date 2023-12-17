@@ -1,31 +1,42 @@
-class MineJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  sidekiq_options retry: false
+class MineJob < WorkJob
+  def start_mining
+    direction = 'forward'
+    actions = Move.new(robot:, direction:).actions
 
-  def perform(*args)
-    robot_id = args
+    trigger_chained_action(direction:, actions:, callback_name: 'check_next_block')
+  end
 
-    Work.create(job_id: jid, robot_id:)
-
-    actions = Move.new(robot:, direction: 'forward').actions
-
-    next_action = NextAction.create(
-      robot_id:,
-      class_name: 'MineCheckNextBlock',
-      method_name: 'call'
+  def check_next_block
+    trigger_query_action(
+      actions: ['detectDown'],
+      callback_name: 'check_fuel_level'
     )
+  end
 
-    ActionCable.server.broadcast(
-      "robot_dashboard_#{robot.robot_id}",
-      {
-        type: 'chained_action',
-        id: robot.robot_id,
-        actions:,
-        job_id: jid,
-        direction:,
-        next_action_id: next_action.id
-      }
+  def check_fuel_level
+    trigger_query_action(
+      actions: ['getFuelLevel'],
+      callback_name: 'dig'
     )
+  end
+
+  def dig
+    if params['getFuelLevel'].positive?
+      trigger_turtle_action(actions: %w[dig digUp suck])
+    else
+      trigger_query_action(actions: ['refuel'], callback_name: 'handle_refuel')
+    end
+  end
+
+  def handle_refuel
+    if params['response']['refuel'] == true
+      check_fuel_level
+    end
+  end
+
+  def robot
+    @robot ||= Robot.find(robot_id)
   end
 end

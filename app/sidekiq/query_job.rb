@@ -1,16 +1,16 @@
-class QueryJob
-  include Sidekiq::Job
+# frozen_string_literal: true
 
-  sidekiq_options retry: false
+class QueryJob < WorkJob
+  def before_perform
+    params['next_action_method_name'] = params['method_name']
+    params['method_name'] = 'make_query'
+  end
 
-  def perform(*args)
-    robot_id, queries, class_name, method_name = args
-
-    Work.create(job_id: jid, robot_id:)
+  def make_query
     next_action = NextAction.create(
       robot_id:,
-      class_name:,
-      method_name:
+      class_name: params['class_name'],
+      method_name: params['next_action_method_name']
     )
 
     ActionCable.server.broadcast(
@@ -18,7 +18,7 @@ class QueryJob
       {
         type: 'turtle_query',
         id: robot_id,
-        queries:,
+        queries: params['actions'],
         job_id: jid,
         next_action_id: next_action.id
       }
