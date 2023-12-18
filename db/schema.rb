@@ -10,13 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_18_005021) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_18_033827) do
   create_table "mining_works", force: :cascade do |t|
     t.integer "robot_id", null: false
     t.boolean "completed", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["robot_id"], name: "index_mining_works_on_robot_id"
+  end
+
+  create_table "next_actions", force: :cascade do |t|
+    t.integer "robot_id", null: false
+    t.string "class_name", null: false
+    t.string "method_name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["robot_id"], name: "index_next_actions_on_robot_id"
   end
 
   create_table "robot_coordinates", force: :cascade do |t|

@@ -57,6 +57,19 @@ class RobotChannel < ApplicationCable::Channel
     MoveJob.perform_async(robot_id, direction)
   end
 
+  def mine(data)
+    robot_id = data['id']
+
+    QueryJob
+      .perform_async(
+        robot_id,
+        ['getFuelLevel'],
+        "MineWithFuelLevel",
+        "call"
+      )
+  end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def action_done(data)
     job_id = data['job_id']
     robot_id = data['computer_id']
@@ -64,10 +77,9 @@ class RobotChannel < ApplicationCable::Channel
 
     original_message = data['original_message']
 
-    if original_message['type'] == 'turtle_action'
+    case original_message['type']
+    when 'turtle_action'
       direction = original_message['direction']
-
-      Work.find_by(job_id:).complete!
 
       Move.new(robot:, direction:).update_coordinates!
 
@@ -81,64 +93,20 @@ class RobotChannel < ApplicationCable::Channel
         }
       )
 
-      ActionCable.server.broadcast(
-        'robot_dashboard',
-        { type: 'action_completed', id: }
-      )
+    when 'turtle_query'
+      response = data['response']
+      next_action_id = original_message['next_action_id']
+
+      NextAction.find(next_action_id).complete!(response)
     end
-  end
 
-  def move_complete(data)
-    coordinates = data['coordinates']
-    id = data['computer_id']
-
-    robot = Robot.set_coordinates(id,
-                                  x: coordinates['x'],
-                                  y: coordinates['y'],
-                                  z: coordinates['z'],
-                                  direction: coordinates['direction'])
-
+    Work.find_by(job_id:).complete!
     ActionCable.server.broadcast(
       'robot_dashboard',
-      { type: 'action_completed', id:, action: 'move' }
-    )
-
-    ActionCable.server.broadcast(
-      'robot_dashboard',
-      {
-        type: 'coordinates_updated',
-        id:,
-        coordinates: robot.coordinates,
-        direction: robot.direction
-      }
+      { type: 'action_completed', id: robot_id }
     )
   end
-
-  def mine_complete(data)
-    coordinates = data['coordinates']
-    id = data['computer_id']
-
-    robot = Robot.set_coordinates(id,
-                                  x: coordinates['x'],
-                                  y: coordinates['y'],
-                                  z: coordinates['z'],
-                                  direction: coordinates['direction'])
-
-    ActionCable.server.broadcast(
-      'robot_dashboard',
-      { type: 'action_completed', id:, action: 'mine' }
-    )
-
-    ActionCable.server.broadcast(
-      'robot_dashboard',
-      {
-        type: 'coordinates_updated',
-        id:,
-        coordinates: robot.coordinates,
-        direction: robot.direction
-      }
-    )
-  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def disconnect
     Robot.all.find_each(&:turn_off)
