@@ -7,7 +7,7 @@ class MineWithFuelLevel
   end
 
   def call
-    MoveJob.perform_async(robot_id, 'forward') if fuel_level.positive?
+    MineJob.perform_async(robot_id) if fuel_level.positive?
   end
 end
 

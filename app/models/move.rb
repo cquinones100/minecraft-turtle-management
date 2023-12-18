@@ -12,7 +12,7 @@ class Move
     case direction
     when 'forward'
       %w[forward]
-    when 'backward'
+    when 'opposite'
       %w[turnLeft turnLeft forward]
     when 'left'
       %w[turnLeft forward]
@@ -22,6 +22,8 @@ class Move
       %w[up]
     when 'down'
       %w[down]
+    when 'backward'
+      %[back]
     end
   end
 

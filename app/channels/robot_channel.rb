@@ -98,6 +98,11 @@ class RobotChannel < ApplicationCable::Channel
       next_action_id = original_message['next_action_id']
 
       NextAction.find(next_action_id).complete!(response)
+
+    when 'chained_action'
+      next_action_id = original_message['next_action_id']
+
+      NextAction.find(next_action_id).complete!(original_message)
     end
 
     Work.find_by(job_id:).complete!
