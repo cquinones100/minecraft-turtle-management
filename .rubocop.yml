@@ -21,6 +21,9 @@ RSpec/MultipleExpectations:
 Metrics/MethodLength:
   Enabled: false
 
+Style/HashLikeCase:
+  Enabled: false
+
 AllCops:
   Exclude:
     - 'config/**/*'
