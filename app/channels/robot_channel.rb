@@ -34,20 +34,7 @@ class RobotChannel < ApplicationCable::Channel
                           z: coordinates['z'],
                           direction: coordinates['direction'])
 
-    ActionCable.server.broadcast(
-      'robot_dashboard',
-      { type: 'acknowledgement', id:, status: robot.status }
-    )
-
-    ActionCable.server.broadcast(
-      'robot_dashboard',
-      {
-        type: 'coordinates_updated',
-        id:,
-        coordinates: robot.coordinates,
-        direction: robot.direction
-      }
-    )
+    broadcast_acknowledgement(robot)
   end
 
   def move(data)
@@ -61,6 +48,15 @@ class RobotChannel < ApplicationCable::Channel
     robot_id = data['id']
 
     MineJob.perform_async({ robot_id:, method_name: 'start_mining' }.stringify_keys)
+  end
+
+  def cancel(data)
+    robot_id = data['id']
+    robot = Robot.find(robot_id)
+
+    Work.where(robot:).find_each(&:complete!)
+
+    broadcast_acknowledgement(robot)
   end
 
   # rubocop:disable Metrics/AbcSize
@@ -78,16 +74,6 @@ class RobotChannel < ApplicationCable::Channel
 
       Move.new(robot:, direction:).update_coordinates!
 
-      ActionCable.server.broadcast(
-        'robot_dashboard',
-        {
-          type: 'coordinates_updated',
-          id: robot.robot_id,
-          coordinates: robot.coordinates,
-          direction: robot.direction
-        }
-      )
-
     when 'turtle_query'
       response = data['response']
       next_action_id = original_message['next_action_id']
@@ -101,10 +87,8 @@ class RobotChannel < ApplicationCable::Channel
     end
 
     Work.find_by(job_id:).complete!
-    ActionCable.server.broadcast(
-      'robot_dashboard',
-      { type: 'action_completed', id: robot_id }
-    )
+
+    broadcast_acknowledgement(robot)
   end
   # rubocop:enable Metrics/AbcSize
 
@@ -116,5 +100,20 @@ class RobotChannel < ApplicationCable::Channel
 
   def id
     params['computer_id']
+  end
+
+  def broadcast_acknowledgement(robot)
+    robot.reload
+
+    ActionCable.server.broadcast(
+      'robot_dashboard',
+      {
+        type: 'acknowledgement',
+        id: robot.id,
+        status: robot.status,
+        coordinates: robot.coordinates,
+        direction: robot.direction
+      }
+    )
   end
 end
