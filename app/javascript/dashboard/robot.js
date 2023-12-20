@@ -63,8 +63,7 @@ class Robot extends Component {
           ${this.getDirection()}
         </td>
         <td>${[this.mineButton()]}</td>
-        <td>${[this.moveButton('forward')]}</td>
-        <td>${[this.moveButton('backward')]}</td>
+        <td>${[this.cancelButton()]}</td>
         </td>
       </tr>
     `;
@@ -75,19 +74,16 @@ class Robot extends Component {
       action: `Mine`,
       robotId: this.id,
       onClick: this.mine.bind(this),
-      disabled: this.busy,
+      disabled: this.busy || this.status == "offline",
     });
   }
 
-  /**
-   * @param {"forward"|"backward"} direction
-   */
-  moveButton(direction) {
+  cancelButton() {
     return new CancelableButton({
-      action: `Move ${direction}`,
+      action: `Cancel`,
       robotId: this.id,
-      onClick: this.move.bind(this, direction),
-      disabled: this.busy,
+      onClick: this.cancel.bind(this),
+      disabled: !this.busy || this.status == "offline",
     });
   }
 
@@ -163,6 +159,14 @@ class Robot extends Component {
       this.busy = true;
 
       window.RobotChannel.perform("mine", { id: this.id });
+    });
+  }
+
+  cancel() {
+    this.setState(() => {
+      this.busy = true;
+
+      window.RobotChannel.perform("cancel", { id: this.id });
     });
   }
 

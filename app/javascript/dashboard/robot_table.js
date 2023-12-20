@@ -17,11 +17,7 @@ class RobotTable extends Component {
   constructor(robots) {
     super();
 
-    console.log(robots);
-
-    this.robots = robots.map((robot) => {
-      return new Robot(robot);
-    });
+    this.robots = robots;
   }
 
   body() {
@@ -35,7 +31,7 @@ class RobotTable extends Component {
             <th scope="col">Direction</th>
             <th scope="col">Actions</th>
           </tr>
-          ${this.robots}
+          ${this.robotRows()}
         </tbody>
       </table>
     `;
@@ -45,25 +41,43 @@ class RobotTable extends Component {
     * @param {import("./robot").RobotProps} robot
     */
   addRobot(robot) {
-    const existingRobot = this.robots.find((theRobot) => 
-      theRobot.id == robot.robot_id
-    );
+    const newRobots = [];
+    let robotFound = false;
 
-    if (existingRobot) {
-      existingRobot.setStatus(robot.status);
-    } else {
-      const newRobots = this.robots.concat(new Robot(robot));
+    for (const thisRobot of this.robots) {
+      if (thisRobot.robot_id == robot.robot_id) {
+        newRobots.push(robot);
 
-      this.setRobots(newRobots);
+        robotFound = true;
+      } else {
+        newRobots.push(thisRobot);
+      }
     }
+
+    if (!robotFound) {
+      newRobots.push(robot);
+    }
+
+    this.setState(() => {
+      this.robots = newRobots;
+    });
   }
 
-  /**
-   * @param {Robot[]} robots
-   */
-  setRobots(robots) {
+  robotRows() {
+    return this.robots.map((robot) => {
+      return new Robot(robot);
+    });
+  }
+
+  removeRobot({ robot_id }) {
     this.setState(() => {
-      this.robots = robots;
+      this.robots = this.robots.map((robot) => {
+        if (robot.robot_id !== robot_id) {
+          robot.status = "offline";
+        }
+
+        return robot;
+      }, []);
     });
   }
 }
