@@ -86,7 +86,7 @@ class RobotChannel < ApplicationCable::Channel
       NextAction.find(next_action_id).complete!(original_message)
     end
 
-    Work.find_by(job_id:).complete!
+    Work.find_by(job_id:)&.complete!
 
     broadcast_acknowledgement(robot)
   end

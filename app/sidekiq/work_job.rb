@@ -14,7 +14,7 @@ class WorkJob
     puts "doing work #{self.class.name}. params: #{params}"
     puts ''
 
-    Work.create(job_id: jid, robot_id:)
+    create_work
 
     send(params['method_name'])
   end
@@ -22,6 +22,12 @@ class WorkJob
   private
 
   attr_accessor :params
+
+  def work
+    @work ||= Work.create(job_id: jid, robot_id:)
+  end
+
+  alias create_work work
 
   def robot_id
     params['robot_id']
@@ -54,7 +60,8 @@ class WorkJob
     @next_action ||= NextAction.create(
       robot_id:,
       class_name: self.class.name,
-      method_name:
+      method_name:,
+      work:
     )
   end
 
