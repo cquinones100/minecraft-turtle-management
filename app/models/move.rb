@@ -23,7 +23,7 @@ class Move
     when 'down'
       %w[down]
     when 'backward'
-      %[back]
+      %w[back]
     end
   end
 

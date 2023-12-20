@@ -16,10 +16,25 @@ class MineJob < WorkJob
   end
 
   def check_fuel_level
-    trigger_query_action(
-      actions: ['getFuelLevel'],
-      callback_name: 'dig'
-    )
+    if params['detectDown']
+      trigger_query_action(
+        actions: ['getFuelLevel'],
+        callback_name: 'dig'
+      )
+    else
+      direction = 'backward'
+      actions = Move.new(robot:, direction:).actions
+
+      ActionCable.server.broadcast(
+        "robot_dashboard_#{robot_id}",
+        {
+          type: 'turtle_action',
+          id: robot_id,
+          job_id: jid,
+          actions:
+        }
+      )
+    end
   end
 
   def dig
@@ -31,7 +46,7 @@ class MineJob < WorkJob
   end
 
   def handle_refuel
-    if params['response']['refuel'] == true
+    if params['response']['refuel']
       check_fuel_level
     end
   end
