@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
 class Robot < ApplicationRecord
+  has_many :robot_statuses, dependent: :destroy, inverse_of: :robot
   has_one :robot_status, -> { order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
+
   has_one :robot_coordinate, -> { order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
-  has_one :mia, -> { where(active: true).order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
+  has_many :robot_coordinates, dependent: :destroy, inverse_of: :robot
+
   has_one :work, -> { where(completed: false).order(created_at: :desc) }, dependent: :destroy, inverse_of: :robot
+  has_many :works, dependent: :destroy, inverse_of: :robot
 
   validates :robot_id, presence: true, uniqueness: true
 
