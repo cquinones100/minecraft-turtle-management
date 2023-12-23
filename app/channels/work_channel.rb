@@ -1,6 +1,6 @@
 class WorkChannel < ApplicationCable::Channel
   def subscribed
-    # stream_from "some_channel"
+    stream_from 'work_dashboard'
   end
 
   def unsubscribed

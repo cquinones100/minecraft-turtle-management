@@ -14,9 +14,9 @@ class WorkJob
     puts "doing work #{self.class.name}. params: #{params}"
     puts ''
 
-    create_work
-
     send(params['method_name'])
+
+    work.save!
   end
 
   private
@@ -24,7 +24,7 @@ class WorkJob
   attr_accessor :params
 
   def work
-    @work ||= Work.create(job_id: jid, robot_id:)
+    @work ||= Work.new(job_id: jid, robot_id:, worker_name: self.class.name)
   end
 
   alias create_work work
@@ -36,6 +36,9 @@ class WorkJob
   def before_perform; end
 
   def trigger_chained_action(callback_name:, **args)
+    work.messages = "Chained Action: #{callback_name}"
+    work.save!
+
     ActionCable.server.broadcast(
       "robot_dashboard_#{robot_id}",
       {
@@ -48,6 +51,10 @@ class WorkJob
   end
 
   def trigger_query_action(actions:, callback_name:)
+    work.messages = "Query: #{actions.join(', ')}"
+    work.complete!
+    work.save!
+
     QueryJob.perform_async({
       robot_id:,
       actions:,
@@ -57,6 +64,9 @@ class WorkJob
   end
 
   def next_action(method_name)
+    work.messages = "Next Action: #{method_name}"
+    work.save!
+
     @next_action ||= NextAction.create(
       robot_id:,
       class_name: self.class.name,
@@ -66,6 +76,9 @@ class WorkJob
   end
 
   def trigger_turtle_action(**args)
+    work.messages = "Action: #{args[:actions].join(', ')}"
+    work.save!
+
     ActionCable.server.broadcast(
       "robot_dashboard_#{robot.robot_id}",
       {

@@ -1,0 +1,6 @@
+<% content_for :head do %>
+  <%= javascript_import_module_tag 'work' %>
+<% end %>
+
+<div id="work-container" data-works="<%= @works.to_json %>">
+</div>

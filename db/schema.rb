@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_23_091037) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_23_095445) do
   create_table "next_actions", force: :cascade do |t|
     t.integer "robot_id", null: false
     t.string "class_name", null: false
@@ -56,8 +56,11 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_23_091037) do
     t.boolean "completed", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "worker_name", null: false
+    t.string "messages", null: false
     t.index ["job_id"], name: "index_works_on_job_id", unique: true
     t.index ["robot_id"], name: "index_works_on_robot_id"
+    t.index ["worker_name"], name: "index_works_on_worker_name"
   end
 
 end
