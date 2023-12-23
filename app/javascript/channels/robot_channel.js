@@ -9,13 +9,18 @@ import consumer from "./consumer"
 function start(robotTable, container) {
   const channel = "RobotChannel";
   const dashboard = true;
+  let mounted = false;
 
   return consumer.subscriptions.create({
     channel,
     dashboard,
   }, {
     connected() {
-      robotTable.mount(container);
+      if (!mounted) {
+        robotTable.mount(container);
+
+        mounted = true;
+      }
     },
   
     disconnected() {
