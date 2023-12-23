@@ -10,15 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_20_030722) do
-  create_table "mining_works", force: :cascade do |t|
-    t.integer "robot_id", null: false
-    t.boolean "completed", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["robot_id"], name: "index_mining_works_on_robot_id"
-  end
-
+ActiveRecord::Schema[7.1].define(version: 2023_12_23_091037) do
   create_table "next_actions", force: :cascade do |t|
     t.integer "robot_id", null: false
     t.string "class_name", null: false
@@ -42,12 +34,6 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_20_030722) do
     t.index ["x"], name: "index_robot_coordinates_on_x"
     t.index ["y"], name: "index_robot_coordinates_on_y"
     t.index ["z"], name: "index_robot_coordinates_on_z"
-  end
-
-  create_table "robot_mias", force: :cascade do |t|
-    t.integer "robot_id", null: false
-    t.boolean "active", default: true, null: false
-    t.index ["robot_id"], name: "index_robot_mias_on_robot_id"
   end
 
   create_table "robot_statuses", force: :cascade do |t|
