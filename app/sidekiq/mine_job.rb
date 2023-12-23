@@ -25,15 +25,7 @@ class MineJob < WorkJob
       direction = 'backward'
       actions = Move.new(robot:, direction:).actions
 
-      ActionCable.server.broadcast(
-        "robot_dashboard_#{robot_id}",
-        {
-          type: 'turtle_action',
-          id: robot_id,
-          job_id: jid,
-          actions:
-        }
-      )
+      trigger_turtle_action(actions:)
     end
   end
 

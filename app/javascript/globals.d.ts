@@ -1,6 +1,10 @@
+type Channel = {
+  perform: (action: string, data: any) => void;
+};
+
 interface Window {
-  RobotChannel: {
-    perform: (action: string, data: any) => void;
-  };
+  RobotChannel: Channel;
+
+  WorkChannel: Channel;
 }
 
