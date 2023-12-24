@@ -24,6 +24,9 @@ Metrics/MethodLength:
 Style/HashLikeCase:
   Enabled: false
 
+Metrics/ParameterLists:
+  Enabled: false
+
 AllCops:
   Exclude:
     - 'config/**/*'
