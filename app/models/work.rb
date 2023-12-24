@@ -11,7 +11,7 @@ class Work < ApplicationRecord
 
     previous_work = Work.find_by(next_work_id: id)
 
-    previous_work.complete!
+    previous_work&.complete!
   end
 
   def run_callback!(previous_work_id:)
