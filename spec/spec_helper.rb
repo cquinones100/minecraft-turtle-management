@@ -20,6 +20,7 @@ require 'capybara/rspec'
 Capybara.app_host = 'http://localhost:3002'
 Capybara.server_host = 'localhost'
 Capybara.server_port = '3002'
+Capybara.default_driver = :selenium
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate

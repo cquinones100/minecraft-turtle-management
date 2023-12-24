@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/turtle_mock'
+
+require 'sidekiq/testing'
+Sidekiq::Testing.inline!
 
 RSpec.describe 'Dashboard', type: :feature, js: true do
   describe 'on load' do
@@ -16,10 +20,15 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
       expect(robot_direction(robot.id).text).to eq ''
     end
 
-    it "displays an existing robot's mining status" do
+    it 'displays an existing working status' do
       robot = Robot.create(robot_id: 1)
 
-      robot.start_mining
+      Work.create(
+        robot:,
+        job_id: '123',
+        messages: %w[forward],
+        worker_name: 'MineJob'
+      )
 
       visit '/'
 
@@ -31,18 +40,27 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
     it 'adds new robots' do
       visit_dashboard
 
-      acknowledge(1)
+      TurtleMock.new(robot_id: 1, context: self).acknowledge
 
       expect(robot_row(1)).not_to be_nil
 
-      acknowledge(2)
+      TurtleMock.new(robot_id: 2, context: self).acknowledge
+
       expect(robot_row(2)).not_to be_nil
     end
 
     it 'reflects the declared coordinates' do
       visit_dashboard
 
-      acknowledge(1, x: 12, y: 2, z: 3, direction: 'north')
+      TurtleMock
+        .new(
+          robot_id: 1,
+          x: 12,
+          y: 2,
+          z: 3,
+          direction: 'north',
+          context: self
+        ).acknowledge
 
       expect(robot_id(1).text).to eq '1'
       expect(robot_status(1).text).to eq '🟢'
@@ -70,15 +88,26 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
 
       visit '/'
 
-      expect(mining_button(robot.id)[:disabled]).to eq 'false'
+      turtle_mock = TurtleMock.new(
+        robot_id: robot.id,
+        x: 1,
+        y: 1,
+        z: 1,
+        direction: 'north',
+        context: self
+      )
+
+      turtle_mock.acknowledge
+
+      expect(mining_button(robot.id).disabled?).to eq false
 
       mining_button(robot.id).click
 
-      expect(mining_button(robot.id)[:disabled]).to eq 'true'
+      expect(mining_button(robot.id).disabled?).to eq true
 
-      complete_action(robot, action: 'mine')
+      turtle_mock.stop_mining
 
-      expect(mining_button(robot.id)[:disabled]).to be_nil
+      expect(mining_button(robot.id).disabled?).to eq false
     end
   end
 
@@ -116,41 +145,11 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
     page.find("#robot-#{id}-direction")
   end
 
-  def mining_button(id)
-    page.find("#robot-#{id}-mine-button")
-  end
-
-  def acknowledge(id, x: 1, y: 1, z: 1, direction: 'north')
-    page.execute_script(
-      "window.RobotChannel.perform(
-        'acknowledgement',
-        {
-          computer_id: #{id},
-          coordinates: {
-            x: #{x},
-            y: #{y},
-            z: #{z},
-            direction: '#{direction}',
-          },
-        }
-      )"
-    )
-  end
-
-  def complete_action(robot, action:)
-    page.execute_script(
-      "window.RobotChannel.perform(
-        '#{action}_complete',
-        {
-          computer_id: #{robot.id},
-          coordinates: {
-            x: '#{robot.coordinates[:x]}',
-            y: '#{robot.coordinates[:y]}',
-            z: '#{robot.coordinates[:z]}',
-            direction: '#{robot.direction}',
-          },
-        }
-      )"
-    )
+  def mining_button(id, disabled: nil)
+    page.find("#robot-#{id}-Mine-button#{if disabled.present?
+                                           ":#{disabled ? 'disabled' : 'enabled'}"
+                                         else
+                                           ''
+                                         end}")
   end
 end
