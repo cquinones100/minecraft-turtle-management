@@ -3,6 +3,9 @@
 require 'rails_helper'
 require 'support/turtle_mock'
 
+require 'sidekiq/testing'
+Sidekiq::Testing.inline!
+
 RSpec.describe 'Dashboard', type: :feature, js: true do
   describe 'on load' do
     it 'displays an existing robot' do
