@@ -10,18 +10,29 @@ class WorkJob
 
     before_perform
 
-    puts ''
-    puts "doing work #{self.class.name}. params: #{params}"
-    puts ''
-
     send(params['method_name'])
 
     work.save!
+
+    update_previous_work if params['previous_work_id']
   end
 
   private
 
   attr_accessor :params
+
+  def log_work_to_console
+    puts ''
+    puts "doing work #{self.class.name}. params: #{params}"
+    puts ''
+  end
+
+  def update_previous_work
+    previous_work = Work.find(params['previous_work_id'])
+
+    previous_work.next_work_id = work.id
+    previous_work.save!
+  end
 
   def work
     @work ||= Work.new(job_id: jid, robot_id:, worker_name: self.class.name)
@@ -34,21 +45,6 @@ class WorkJob
   end
 
   def before_perform; end
-
-  def trigger_chained_action(callback_name:, **args)
-    work.messages = "Chained Action: #{callback_name}"
-    work.save!
-
-    ActionCable.server.broadcast(
-      "robot_dashboard_#{robot_id}",
-      {
-        type: 'chained_action',
-        id: robot_id,
-        job_id: jid,
-        next_action_id: next_action(callback_name).id
-      }.merge(args)
-    )
-  end
 
   def trigger_query_action(actions:, callback_name:)
     work.messages = "Query: #{actions.join(', ')}"
@@ -63,28 +59,21 @@ class WorkJob
     }.stringify_keys)
   end
 
-  def next_action(method_name)
-    work.messages = "Next Action: #{method_name}"
+  def trigger_turtle_action(callback: nil, **args)
+    work.messages = "Action: #{args[:actions].join(', ')}"
+    work.callback = callback
     work.save!
 
-    @next_action ||= NextAction.create(
-      robot_id:,
-      class_name: self.class.name,
-      method_name:,
-      work:
-    )
+    broadcast(type: 'turtle_action', **args)
   end
 
-  def trigger_turtle_action(**args)
-    work.messages = "Action: #{args[:actions].join(', ')}"
-    work.save!
-
+  def broadcast(type:, **args)
     ActionCable.server.broadcast(
       "robot_dashboard_#{robot.robot_id}",
       {
-        type: 'turtle_action',
+        type:,
+        previous_work_id: work.id,
         id: robot.robot_id,
-        actions: args[:actions],
         job_id: jid
       }.merge(args)
     )

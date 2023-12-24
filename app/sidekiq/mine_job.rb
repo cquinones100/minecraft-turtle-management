@@ -5,14 +5,11 @@ class MineJob < WorkJob
     direction = 'forward'
     actions = Move.new(robot:, direction:).actions
 
-    trigger_chained_action(direction:, actions:, callback_name: 'check_next_block')
+    trigger_turtle_action(direction:, actions:, callback: 'check_next_block')
   end
 
   def check_next_block
-    trigger_query_action(
-      actions: ['detectDown'],
-      callback_name: 'check_fuel_level'
-    )
+    trigger_turtle_action(actions: %w[forward])
   end
 
   def check_fuel_level

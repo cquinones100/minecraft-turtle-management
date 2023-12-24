@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_23_095445) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_23_163137) do
   create_table "next_actions", force: :cascade do |t|
     t.integer "robot_id", null: false
     t.string "class_name", null: false
@@ -58,9 +58,13 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_23_095445) do
     t.datetime "updated_at", null: false
     t.string "worker_name", null: false
     t.string "messages", null: false
+    t.integer "next_work_id"
+    t.string "callback"
     t.index ["job_id"], name: "index_works_on_job_id", unique: true
+    t.index ["next_work_id"], name: "index_works_on_next_work_id"
     t.index ["robot_id"], name: "index_works_on_robot_id"
     t.index ["worker_name"], name: "index_works_on_worker_name"
   end
 
+  add_foreign_key "works", "works", column: "next_work_id"
 end
