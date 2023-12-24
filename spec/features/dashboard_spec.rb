@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'sidekiq/testing'
 require 'support/turtle_mock'
-
-Sidekiq::Testing.inline!
 
 RSpec.describe 'Dashboard', type: :feature, js: true do
   describe 'on load' do
@@ -51,7 +48,15 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
     it 'reflects the declared coordinates' do
       visit_dashboard
 
-      TurtleMock.new(1, x: 12, y: 2, z: 3, direction: 'north').acknowledge
+      TurtleMock
+        .new(
+          robot_id: 1,
+          x: 12,
+          y: 2,
+          z: 3,
+          direction: 'north',
+          context: self
+        ).acknowledge
 
       expect(robot_id(1).text).to eq '1'
       expect(robot_status(1).text).to eq '🟢'
@@ -79,13 +84,20 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
 
       visit '/'
 
+      TurtleMock.new(
+        robot_id: robot.id,
+        x: 1,
+        y: 1,
+        z: 1,
+        direction: 'north',
+        context: self
+      ).acknowledge
+
       expect(mining_button(robot.id)[:disabled]).to eq 'false'
 
       mining_button(robot.id).click
 
       expect(mining_button(robot.id)[:disabled]).to eq 'true'
-
-      complete_action(robot, action: 'mine')
 
       expect(mining_button(robot.id)[:disabled]).to be_nil
     end
@@ -127,15 +139,5 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
 
   def mining_button(id)
     page.find("#robot-#{id}-Mine-button")
-  end
-
-  def complete_action(robot, action:)
-    page.execute_script(
-      "window.RobotChannel.perform(
-        'action_done',
-        {
-        }
-      )"
-    )
   end
 end
