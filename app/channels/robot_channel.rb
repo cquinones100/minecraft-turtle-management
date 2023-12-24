@@ -65,8 +65,9 @@ class RobotChannel < ApplicationCable::Channel
     robot_id = data['computer_id']
     robot = Robot.find(robot_id)
 
-    original_message = data['original_message']
+    original_message = data['original_message'] || {}
     original_message.merge!({ robot_id: id }.stringify_keys)
+    work = Work.find_by(job_id:)
 
     case original_message['type']
     when 'turtle_action'
@@ -74,19 +75,23 @@ class RobotChannel < ApplicationCable::Channel
 
       Move.new(robot:, direction:).update_coordinates!
 
+      if original_message['previous_work_id']
+        previous_work = Work.find(original_message['previous_work_id'])
+
+        previous_work
+          .run_callback!(
+            previous_work_id: Work.find_by(job_id: original_message['job_id']).id
+          )
+      end
+
     when 'turtle_query'
       response = data['response']
       next_action_id = original_message['next_action_id']
 
       NextAction.find(next_action_id).complete!(response)
-
-    when 'chained_action'
-      next_action_id = original_message['next_action_id']
-
-      NextAction.find(next_action_id).complete!(original_message)
     end
 
-    Work.find_by(job_id:)&.complete!
+    work.complete! if work.callback.nil?
 
     broadcast_acknowledgement(robot)
   end
