@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'sidekiq/testing'
+require 'support/turtle_mock'
+
+Sidekiq::Testing.inline!
 
 RSpec.describe 'Dashboard', type: :feature, js: true do
   describe 'on load' do
@@ -16,10 +20,15 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
       expect(robot_direction(robot.id).text).to eq ''
     end
 
-    it "displays an existing robot's mining status" do
+    it 'displays an existing working status' do
       robot = Robot.create(robot_id: 1)
 
-      robot.start_mining
+      Work.create(
+        robot:,
+        job_id: '123',
+        messages: %w[forward],
+        worker_name: 'MineJob'
+      )
 
       visit '/'
 
@@ -31,7 +40,7 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
     it 'adds new robots' do
       visit_dashboard
 
-      acknowledge(1)
+      TurtleMock.new(robot_id: 1).acknowledge
 
       expect(robot_row(1)).not_to be_nil
 
@@ -42,7 +51,7 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
     it 'reflects the declared coordinates' do
       visit_dashboard
 
-      acknowledge(1, x: 12, y: 2, z: 3, direction: 'north')
+      TurtleMock.new(1, x: 12, y: 2, z: 3, direction: 'north').acknowledge
 
       expect(robot_id(1).text).to eq '1'
       expect(robot_status(1).text).to eq '🟢'
@@ -117,38 +126,14 @@ RSpec.describe 'Dashboard', type: :feature, js: true do
   end
 
   def mining_button(id)
-    page.find("#robot-#{id}-mine-button")
-  end
-
-  def acknowledge(id, x: 1, y: 1, z: 1, direction: 'north')
-    page.execute_script(
-      "window.RobotChannel.perform(
-        'acknowledgement',
-        {
-          computer_id: #{id},
-          coordinates: {
-            x: #{x},
-            y: #{y},
-            z: #{z},
-            direction: '#{direction}',
-          },
-        }
-      )"
-    )
+    page.find("#robot-#{id}-Mine-button")
   end
 
   def complete_action(robot, action:)
     page.execute_script(
       "window.RobotChannel.perform(
-        '#{action}_complete',
+        'action_done',
         {
-          computer_id: #{robot.id},
-          coordinates: {
-            x: '#{robot.coordinates[:x]}',
-            y: '#{robot.coordinates[:y]}',
-            z: '#{robot.coordinates[:z]}',
-            direction: '#{robot.direction}',
-          },
         }
       )"
     )
