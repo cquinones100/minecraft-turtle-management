@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 class WorkJob
-  include Sidekiq::Job
+  def self.perform_async(*args)
+    new.perform(*args)
+  end
 
-  sidekiq_options retry: false
+  def initialize
+    @jid = SecureRandom.uuid
+  end
 
   def perform(*args)
     @params = args[0]
@@ -20,6 +24,7 @@ class WorkJob
   private
 
   attr_accessor :params
+  attr_reader :jid
 
   def log_work_to_console
     puts ''
@@ -46,7 +51,7 @@ class WorkJob
 
   def before_perform; end
 
-  def trigger_query_action(actions:, callback_name:)
+  def trigger_query_action(actions:, callback:)
     work.messages = "Query: #{actions.join(', ')}"
     work.complete!
     work.save!
@@ -55,7 +60,7 @@ class WorkJob
       robot_id:,
       actions:,
       class_name: self.class.name,
-      method_name: callback_name
+      method_name: callback
     }.stringify_keys)
   end
 

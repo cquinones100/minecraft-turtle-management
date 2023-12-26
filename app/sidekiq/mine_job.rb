@@ -9,14 +9,17 @@ class MineJob < WorkJob
   end
 
   def check_next_block
-    trigger_turtle_action(actions: %w[forward])
+    trigger_query_action(
+      actions: ['detectDown'],
+      callback: 'check_fuel_level'
+    )
   end
 
   def check_fuel_level
     if params['detectDown']
       trigger_query_action(
         actions: ['getFuelLevel'],
-        callback_name: 'dig'
+        callback: 'dig'
       )
     else
       direction = 'backward'
@@ -30,7 +33,7 @@ class MineJob < WorkJob
     if params['getFuelLevel'].positive?
       trigger_turtle_action(actions: %w[dig digUp suck])
     else
-      trigger_query_action(actions: ['refuel'], callback_name: 'handle_refuel')
+      trigger_query_action(actions: ['refuel'], callback: 'handle_refuel')
     end
   end
 
